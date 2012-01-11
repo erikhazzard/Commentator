@@ -1,0 +1,15 @@
+README
+=========================================
+This is a code and comment analysis script that is designed to encourage 
+developers to more thoroughly comment code. 
+
+Right now it's pretty base, but accepts Javascript / CoffeeScript files as
+input.  TODO: Other file types can be easily added by adding definitions.
+
+=========================================
+To call the script, call enforce.py and pass in a file name (either relative
+path or absolute).  e.g.
+
+    python enforce.py test.js
+
+    python enforce.py ~/Code/my_project/src/js/my_big_file.js
