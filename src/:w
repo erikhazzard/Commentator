@@ -179,14 +179,11 @@ class Enforcer(object):
             Update this object's properties based on comment and
             code statistics
         '''
-        #Build a regex that contains words followed by a space (This regex
-        #   will be the same for each iteration in the loop)
-        comment_regex = re.compile(r'[a-zA-Z\']* ')
-
         #Do a regex match for each key in the Ruleset
         for key in self.rule_set:
             #Build a regular expression using the current key in rule_set
             regex = re.compile(r'%s' % (key))
+            print '%s' % (key)
             #Match the regular expression with the string passed in from line
             results = regex.findall(content)
 
@@ -202,55 +199,11 @@ class Enforcer(object):
                 #   MORE WORDS = MORE POINTS.  Less words = less points
                 #See if it's a comment
                 if self.rule_set[key]['type'] == 'comment':
-                    #Comment was found, so now we need to do someparsing on it
-                    #   to determine its value
-
-                    comment_points = 0
-                    for comment in results:
-                        #TODO: Write function to test if a comment is just
-                        #   commented out code
-                        #Things we want:
-                        #   1. Don't count commented code as much
-                        #   2. Up until 8 words, the length affects the worth
-
-                        #Get the number of words in the comment
-                        num_words = comment_regex.findall(comment)
-                        num_words_len = len(num_words)
-
-                        #TODO: This should be a scale function
-                        #There should be at least 4 words in a comment.
-                        #   Anything less isn't counted
-                        #LESS THAN CHECKS
-                        if num_words_len < 3:
-                            #Do nothing
-                            comment_points += 0
-                        elif num_words_len < 5:
-                            #Less then six words, so give some points
-                            comment_points += .3
-                        elif num_words_len < 7:
-                            comment_points += .6
-                        elif num_words_len < 8:
-                            comment_points += .8
-
-                        #GREAT THAN CHECKS
-                        elif num_words_len > 12:
-                            comment_points += 1.6
-
-                        #Everything else
-                        else:
-                            #If the comment length is decent, add some extra 
-                            #   points
-                            comment_points += 1.3
-
                     #Add to the amount of comments found
-                    self.comment_points += comment_points
+                    self.comment_points += len(results)
                 else:
                     #It's code
-                    #Add to the code_points the amount of times this match is
-                    #   found multiplied by the point value
-                    self.code_points += (
-                        len(results) * self.rule_set[key]['points']
-                    )
+                    self.code_points += len(results)
 
 
     #------------------------------------
@@ -282,15 +235,14 @@ class Enforcer(object):
 
         Breakdown
         ---------------------------------
-        Percentage of comments to code: %(point_percentage)s %%
+        Percentage of comments to code: %(point_percentage)s
 
         ''' % ({
             'file_name': self.file_name,
             'file_type': self.file_type,
             'comment_points': self.comment_points,
             'code_points': self.code_points,
-            #Divide comments by code_points and grab the integer of it
             'point_percentage': str(
-                int((self.comment_points / (self.code_points * 1.0)) * 100)),
+                (self.comment_points / (self.code_points * 1.0)) * 100),
         })
 

@@ -34,50 +34,65 @@ RuleSet = {
     #Comments
     #   Don't count comment blocks for JS.
     #------------------------------------
-    '\/\/': {
+    '\/\/.*\n': {
         'type': 'comment',
+        'points': 1,
     },
-    '#': {
+    '#.*\n': {
         'type': 'comment',
+        'points': 1,
     },
-    # NOTE: If you wanted to count comment blocks, example:
-    #JS
-    '\/\*.*\*\/': {
-        'type': 'comment',
-    }, 
-    #COFFEE
-    '\"\"\".*\"\"\"':{
-        'type': 'comment',
-    }, 
-    '""".*"""':{
-        'type': 'comment',
-    }, 
+
+    ## NOTE: If you wanted to count comment blocks, example:
+    ##JS
+    #'\/\*.*\*\/': {
+    #    'type': 'comment',
+    #}, 
+    ##COFFEE
+    #'\"\"\".*\"\"\"':{
+    #    'type': 'comment',
+    #}, 
+    #'""".*"""':{
+    #    'type': 'comment',
+    #}, 
 
     #------------------------------------
     #Code
     #------------------------------------
     'function': {
         'type': 'code',
-    },
-    '\-\>': {
-        'type': 'code',
-    },
-    '\=\>': {
-        'type': 'code',
+        'points': 4,
     },
     'class': {
         'type': 'code',
-    },
-    'when': {
-        'type': 'code',
+        'points': 4,
     },
     'switch': {
         'type': 'code',
+        'points': 4,
     },
     'for': {
         'type': 'code',
+        'points': 2,
     },
     'if': {
         'type': 'code',
+        'points': 2,
+    },
+
+    #------------------------------------
+    #Coffee Script
+    #------------------------------------
+    '\-\>': {
+        'type': 'code',
+        'points': 4,
+    },
+    '\=\>': {
+        'type': 'code',
+        'points': 4,
+    },
+    'when': {
+        'type': 'code',
+        'points': 2,
     },
 }
