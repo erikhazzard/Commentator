@@ -111,7 +111,7 @@ class Enforcer(object):
         #--------------------------------
         #TODO: Make this extensible, use a class so it isn't coupled
         #   to one rule set
-        self.rule_set = JavascriptRules.RuleSet
+        self.rule_set = FileRules.FileRules(self.file_type).get_rule_set()
         
         #--------------------------------
         #
