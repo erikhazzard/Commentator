@@ -27,10 +27,8 @@ import re
 
 #Commentator imports
 import Errors
-#TODO: FileRules class
 import FileRules
-
-import JavascriptRules
+from Colors import Colors
 
 '''=======================================================================
 
@@ -138,8 +136,6 @@ class Enforcer(object):
         self.code_words_found = 0
         self.code_points = 0 
 
-
-
         #--------------------------------
         #Call process_file
         #--------------------------------
@@ -161,9 +157,9 @@ class Enforcer(object):
         #Open and process the file
         #--------------------------------
         with open(self.file_name) as target_file:
-            #Get the current line
+            #Get the contents of the entire file
             content = target_file.read()
-            #Process the file
+            #Process the entire file at once
             self.analyze_file(content)
 
     #------------------------------------
@@ -173,7 +169,7 @@ class Enforcer(object):
         '''analyze_file
         ---------------
         parameters:
-            content: content to process
+            content: content to process (entire file)
         description:
             Analyze the passed in content (file) based on the file format
             Update this object's properties based on comment and
@@ -183,11 +179,11 @@ class Enforcer(object):
         #   will be the same for each iteration in the loop)
         comment_regex = re.compile(r'[a-zA-Z\']* ')
 
-        #Do a regex match for each key in the Ruleset
+        #Do a regex match for each key in the Ruleset (specified in Rules files)
         for key in self.rule_set:
             #Build a regular expression using the current key in rule_set
             regex = re.compile(r'%s' % (key))
-            #Match the regular expression with the string passed in from line
+            #Match the regular expression with the string passed in from current line
             results = regex.findall(content)
 
             #Handle results
@@ -197,9 +193,6 @@ class Enforcer(object):
                 #TODO: DONT COUNT COMMENTED OUT CODE
                 #   Use a regex to make sure there are at least a few words in a
                 #   comment
-                #TODO: Make comments that are less than N words worth less. 
-                #   IN GENERAL (At least until 7 or 8 words)
-                #   MORE WORDS = MORE POINTS.  Less words = less points
                 #See if it's a comment
                 if self.rule_set[key]['type'] == 'comment':
                     #Comment was found, so now we need to do someparsing on it
@@ -210,7 +203,7 @@ class Enforcer(object):
                         #TODO: Write function to test if a comment is just
                         #   commented out code
                         #Things we want:
-                        #   1. Don't count commented code as much
+                        #   1. Don't count commented code 
                         #   2. Up until 8 words, the length affects the worth
 
                         #Get the number of words in the comment
@@ -252,6 +245,16 @@ class Enforcer(object):
                         len(results) * self.rule_set[key]['points']
                     )
 
+    def get_score_percentage(self):
+        '''Returns the % integer of comment score to code points
+        '''
+        final_score = int((self.comment_points / (self.code_points * 1.0)) * 100)
+
+        #If the final score is over 100, just return 100
+        if final_score > 100:
+            final_score = 100
+
+        return final_score
 
     #------------------------------------
     #String represetion
@@ -261,14 +264,18 @@ class Enforcer(object):
         ----------
         description:
             overrides the built in __str__ method - so when self is printed,
-            it will display something custom'''
-        return '''
-        Commentator Object
+            it will display something custom
+            
+        '''
+
+        ret_string = '''%(color_bold)s 
+        %(color_header)s                                %(color_reset)s
+        %(color_header)s          Commentator           %(color_reset)s
+        %(color_header)s                                %(color_reset)s
         ---------------------------------
-        
-        file_name: %(file_name)s
-        file_type: %(file_type)s
-        
+        file_name: %(color_blue)s%(file_name)s %(color_reset)s
+        file_type: %(color_blue)s%(color_bold)s%(file_type)s %(color_reset)s
+
         ---------------------------------
         Statistics
         ---------------------------------
@@ -282,15 +289,65 @@ class Enforcer(object):
 
         Breakdown
         ---------------------------------
-        Percentage of comments to code: %(point_percentage)s %%
+        Readability / Comment Score
+            %(points_string)s %% %(color_reset)s
+        ''' 
 
-        ''' % ({
+        #This is the acutal % integer value of comment / code points
+        point_percentage = self.get_score_percentage()
+
+        #By default, points string is just the given percentage without colors
+        points_string = '%s' % (point_percentage)
+        percentage_color = ''
+
+        #Get the point percentage string and colorize it based on it's value
+        if point_percentage > 99:
+            percentage_color = '%s%s%s ' % (
+                Colors.green,
+                Colors.smiley,
+                Colors.bold, 
+            )
+        elif point_percentage > 95:
+            percentage_color = '%s ' % (
+                Colors.green,
+        )
+        elif point_percentage > 80:
+            percentage_color = '%s ' % (
+                Colors.yellow,
+        )
+        elif point_percentage > 70:
+            percentage_color = '%s ' % (
+                Colors.blue,
+        )
+        elif point_percentage > 50:
+            percentage_color = '%s ' % (
+                Colors.red,
+        )
+        else:
+            percentage_color = '''%s%s %s ''' % (
+                Colors.bold, 
+                Colors.bg_red,
+                Colors.white,
+        )
+
+        points_string = '%s %s' % (
+            percentage_color,
+            points_string, 
+            )
+        
+        #Fill the ret string's variables
+        ret_string = ret_string % ({
+            'color_bold': Colors.bold,
+            'color_header': '%s %s' % (Colors.bg_blue, Colors.white,),
+            'color_reset': Colors.reset, 
+            'color_cyan': Colors.cyan, 
+            'color_blue': Colors.blue, 
             'file_name': self.file_name,
             'file_type': self.file_type,
             'comment_points': self.comment_points,
             'code_points': self.code_points,
             #Divide comments by code_points and grab the integer of it
-            'point_percentage': str(
-                int((self.comment_points / (self.code_points * 1.0)) * 100)),
+            'points_string': points_string,
         })
 
+        return ret_string

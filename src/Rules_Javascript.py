@@ -42,6 +42,10 @@ RuleSet = {
         'type': 'comment',
         'points': 1,
     },
+    '\/\*.*\*\/': {
+        'type': 'comment',
+        'points': 1,
+    },
 
     ## NOTE: If you wanted to count comment blocks, example:
     ##JS

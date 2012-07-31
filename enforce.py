@@ -27,7 +27,6 @@
 
     ======================================================================= '''
 #Standard library imports
-import os
 import sys
 
 #Enforcer imports
